@@ -10,7 +10,7 @@ inventory = {
 
 @app.route('/', methods=['GET'])
 def home():
-    return jsonify({"message": "Vendor Dash API is live and running via Docker!"})
+    return jsonify({"message": "Vendor Dash API is live and running via Docker, version 2!"})
 
 @app.route('/inventory', methods=['GET'])
 def get_inventory():
