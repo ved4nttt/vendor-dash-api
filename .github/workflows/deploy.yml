@@ -1,0 +1,35 @@
+name: Deploy Vendor Dash to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Navigate to the repo or clone it if it doesn't exist
+            if [ ! -d "vendor-dash-api" ]; then
+              git clone https://github.com/${{ github.repository }}.git vendor-dash-api
+            fi
+            cd vendor-dash-api
+            
+            # Pull latest changes
+            git pull origin main
+            
+            # Rebuild and run the Docker container
+            sudo docker stop vendor-api || true
+            sudo docker rm vendor-api || true
+            sudo docker build -t vendor-dash-image .
+            sudo docker run -d -p 80:5000 --name vendor-api vendor-dash-image
